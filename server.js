@@ -51,10 +51,9 @@ app.post("/notes", (req, res) => {
   });
 });
 
-app.delete("/notes", (req, res) => {
-  const id = req.query.id;
+app.delete("/note/:id", (req, res) => {
+  const id = req.params.id;
   const token = req.headers.authorization;
-  console.log(id, "******", token);
   if (!isValidToken(token)) {
     res.send(401);
   }
@@ -116,6 +115,29 @@ app.post("/login", (req, res) => {
     newDataCache[index].token = uid;
     fs.writeFile("./data.json", JSON.stringify(newDataCache), "utf8", () => {});
     res.send(JSON.stringify(uid));
+  });
+});
+
+app.put("/note/:id", (req, res) => {
+  const { note } = req.body;
+  const id = +req.params.id;
+  const token = req.headers.authorization;
+  if (!isValidToken(token)) {
+    res.send(401);
+  }
+  const userData = dataCache.find(userData => userData.token === token);
+  console.log(userData, "*********");
+  userData.notes.forEach(existingNote => {
+    console.log(existingNote, "----", note);
+    if (existingNote.id === id) {
+      existingNote.title = note.title;
+      existingNote.description = note.description;
+    }
+  });
+  fs.writeFile("./data.json", JSON.stringify(dataCache), "utf8", err => {
+    if (!err) {
+      res.send();
+    }
   });
 });
 
